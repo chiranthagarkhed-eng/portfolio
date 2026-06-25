@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Design tokens — grounded in the Linear design system (design-systems skill):
+  the deepest near-black canvas with a faint blue tint, a four-step surface
+  ladder, and hairline borders carrying depth instead of drop shadows. One
+  chromatic accent (violet-lavender, the project's committed identity). Dark
+  only by design. The Tailwind config maps utility names onto these variables.
+*/
+:root {
+  --background: #010102; /* near-pure black, faint blue tint (Linear canvas) */
+  --surface: #0f1011; /* surface-1 — cards, panels */
+  --surface-raised: #141516; /* surface-2 — hover / featured */
+  --surface-3: #18191a; /* surface-3 — nested / dropdowns */
+  --border: #23252a; /* hairline */
+  --border-strong: #34343a; /* hairline-strong — hover / focus edges */
+  --text-primary: #f7f8f8; /* headlines + emphasized body */
+  --text-secondary: #b0b4bd; /* body copy (AA on canvas) */
+  --text-muted: #8a8f98; /* labels, meta, captions */
+  --text-faint: #62666d; /* disabled, footnotes */
+  --accent: #6c63ff; /* the ONE accent — violet-lavender */
+  --accent-hover: #837bff;
+  --accent-glow: rgba(108, 99, 255, 0.16);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Offset anchored scrolling so the sticky navbar never covers section tops
+       (used as the fallback when Lenis is off, e.g. reduced motion). */
+    scroll-padding-top: 6rem;
+  }
+
+  /* Lenis smooth-scroll requirements. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--text-secondary);
+    /* Inter geometric alternates — the documented Linear substitute voice. */
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: rgba(108, 99, 255, 0.9);
+    color: #ffffff;
+  }
+
+  /* Thin, dark, custom scrollbar — quiet polish signal. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2a2c31 transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #26282d;
+    border: 3px solid var(--background);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #34373d;
+  }
+
+  /* Branded focus ring for keyboard users (Linear-style lavender outline). */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* Animated nav underline — grows from the left on hover, stays lit on the
+     active section. */
+  .nav-underline {
+    position: relative;
+  }
+  .nav-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    height: 1.5px;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: var(--accent);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .nav-underline:hover::after,
+  .nav-underline[data-active="true"]::after {
+    transform: scaleX(1);
+  }
+
+  /* Lifted panel — surface fill + hairline + a faint top edge highlight, the
+     way Linear gives a dark card a "pixel-rendered" edge without drop shadow. */
+  .panel {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+  }
+  .panel-interactive {
+    transition:
+      background-color 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .panel-interactive:hover {
+    background-color: var(--surface-raised);
+    border-color: var(--border-strong);
+  }
+}
+
+@layer utilities {
+  /* Film-grain texture — fixed page layer + hero. Endorsed by premium-ui-system
+     for organic depth on flat dark backgrounds. */
+  .page-grain {
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Faint engineered grid behind the hero — masked to fade out. */
+  .hero-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 65% 55% at 35% 40%, #000 25%, transparent 72%);
+    -webkit-mask-image: radial-gradient(
+      ellipse 65% 55% at 35% 40%,
+      #000 25%,
+      transparent 72%
+    );
+  }
+
+  /* Seamless marquee loop — the track is duplicated, so -50% is one full set. */
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* A single, restrained accent glow — toned well down from a spotlight. */
+  .hero-glow {
+    background: radial-gradient(
+      48% 42% at 32% 38%,
+      rgba(108, 99, 255, 0.1) 0%,
+      rgba(108, 99, 255, 0.03) 38%,
+      transparent 70%
+    );
+  }
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
