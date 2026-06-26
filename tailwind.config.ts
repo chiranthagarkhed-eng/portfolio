@@ -1,9 +1,10 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Tailwind config. Custom color tokens mirror the CSS variables defined in
- * globals.css so utilities like `bg-background` / `text-secondary` resolve to
- * the single source of truth. Fonts are wired to the next/font CSS variables.
+ * Tailwind config for the brutalist-editorial dark portfolio. Core palette is a
+ * bone-on-near-black monochrome (no chromatic accent — `bone` #e9e7e1 is the
+ * single highlight). One-off greys/borders use Tailwind arbitrary values in the
+ * components to stay pixel-faithful to the imported design.
  */
 const config: Config = {
   content: [
@@ -14,36 +15,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        surface: "var(--surface)",
-        "surface-raised": "var(--surface-raised)",
-        "surface-3": "var(--surface-3)",
-        border: "var(--border)",
-        "border-strong": "var(--border-strong)",
-        "text-primary": "var(--text-primary)",
-        "text-secondary": "var(--text-secondary)",
-        "text-muted": "var(--text-muted)",
-        "text-faint": "var(--text-faint)",
-        accent: "var(--accent)",
-        "accent-hover": "var(--accent-hover)",
-        "accent-glow": "var(--accent-glow)",
+        bg: "#0b0b0d", // page background
+        "bg-deep": "#050506", // Skills + footer
+        panel: "#0e0e11", // viz panels, skill cards
+        "panel-hover": "#101014",
+        ink: "#f4f3ef", // primary text
+        bone: "#e9e7e1", // the single accent (squares, dot, button)
+        "bone-hover": "#d8d6d0",
+        muted: "#8a8a90", // body grey
+        "muted-2": "#5a5a60", // labels / faint
       },
       fontFamily: {
-        // One sans voice from display to body (Linear's documented Inter
-        // substitute); mono for the technical layer only.
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
-      },
-      boxShadow: {
-        // Reserved for the primary CTA only — dark surfaces use the surface
-        // ladder + hairlines for depth, not drop shadows.
-        "accent-glow": "0 8px 30px -10px rgba(108,99,255,0.5)",
-      },
-      letterSpacing: {
-        tightest: "-0.035em",
+        display: ["var(--font-archivo)", "Archivo", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
       },
       maxWidth: {
-        content: "72rem", // 1152px — consistent section container width
+        shell: "1360px", // the design's content container
       },
     },
   },

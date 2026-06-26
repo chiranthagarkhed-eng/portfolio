@@ -1,63 +1,58 @@
 /**
- * About — three direct, first-person paragraphs (the data-science × economics
- * intersection stated explicitly). The "stats" are presented as a spec-sheet:
- * hairline-divided label/value rows, not glowing metric tiles (the hero-metric
- * template is an impeccable absolute ban). Photo placeholder: drop
- * /public/profile.jpg and swap the monogram.
+ * About — a large statement headline (with an underlined keyword) beside a
+ * two-column body paragraph and a 2x2 facts grid built from hairline-gapped
+ * tiles. Mirrors the imported design's About block.
  */
 import { about } from "@/lib/data";
-import { Section, SectionHeading } from "@/components/ui/Section";
-import { Reveal, RevealItem } from "@/components/ui/Reveal";
+import { Reveal } from "@/components/Reveal";
 
 export function About() {
   return (
-    <Section id="about" divider={false}>
-      <SectionHeading
-        eyebrow="About"
-        title="Quantitative rigor, with a reason behind it."
-      >
-        I work where the numbers meet the decision.
-      </SectionHeading>
-
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-16">
-        <Reveal className="space-y-5" stagger>
-          {about.paragraphs.map((p, i) => (
-            <RevealItem key={i}>
-              <p className="text-base leading-[1.85] text-text-secondary sm:text-[1.0625rem] [&:first-child]:text-text-primary">
-                {p}
-              </p>
-            </RevealItem>
-          ))}
+    <section id="about" className="border-t border-white/[0.06] bg-bg px-6 py-[130px] text-ink sm:px-10">
+      <div className="mx-auto max-w-shell">
+        <Reveal as="div" className="mb-[34px] font-mono text-xs uppercase tracking-[0.14em] text-[#7a7a80]">
+          {"// About"}
+        </Reveal>
+        <Reveal
+          as="h2"
+          className="m-0 max-w-[1100px] font-display text-[clamp(30px,4.2vw,62px)] font-bold leading-[1.05] tracking-[-0.025em]"
+        >
+          {about.heading.lead}
+          <span className="underline decoration-[#9a9aa2] decoration-2 underline-offset-[8px]">
+            {about.heading.emphasis}
+          </span>
+          {about.heading.tail}
         </Reveal>
 
-        <Reveal className="flex flex-col items-start gap-8">
-          {/* Photo placeholder — circular, hairline ring. */}
-          <div
-            className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border border-border-strong bg-surface-raised text-2xl font-semibold tracking-tight text-text-muted"
-            role="img"
-            aria-label={about.photoAlt}
+        <div className="mt-16 grid items-start gap-[60px] lg:grid-cols-[1.3fr_1fr]">
+          <Reveal
+            as="p"
+            className="m-0 max-w-[560px] font-mono text-sm leading-[1.85] text-[#a7a7ad]"
           >
-            {/* [REPLACE] swap this monogram for:
-                <Image src="/profile.jpg" alt={about.photoAlt} fill className="object-cover" /> */}
-            CA
-          </div>
+            {about.paragraph.lead}
+            <span className="text-ink">{about.paragraph.emphasis}</span>
+            {about.paragraph.tail}
+          </Reveal>
 
-          {/* Spec sheet — label/value rows divided by hairlines. */}
-          <dl className="w-full divide-y divide-border border-y border-border">
-            {about.stats.map((s) => (
-              <div
-                key={s.label}
-                className="flex items-baseline justify-between gap-4 py-3"
-              >
-                <dt className="text-sm text-text-muted">{s.label}</dt>
-                <dd className="text-right font-mono text-sm text-text-primary">
-                  {s.value}
-                </dd>
+          <Reveal
+            as="div"
+            className="grid grid-cols-2 gap-px border border-white/[0.08] bg-white/[0.08]"
+          >
+            {about.facts.map((f) => (
+              <div key={f.label} className="bg-bg p-[22px]">
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#6f6f76]">
+                  {f.label}
+                </div>
+                <div
+                  className={`mt-2 font-display text-lg ${f.accent ? "text-bone" : "text-ink"}`}
+                >
+                  {f.value}
+                </div>
               </div>
             ))}
-          </dl>
-        </Reveal>
+          </Reveal>
+        </div>
       </div>
-    </Section>
+    </section>
   );
 }

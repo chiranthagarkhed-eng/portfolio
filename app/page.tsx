@@ -1,36 +1,30 @@
 /**
- * Home — the entire single-page site. Sections render in spec order and are
- * separated by a quiet `border-t` rather than decorative SVG dividers. The
- * Navbar is fixed and lives outside the section flow.
+ * Home — the single-page portfolio, composed in the design's section order:
+ * Hero → Work → About → Skills → Contact → Footer. The custom cursor renders
+ * once at the root (pointer devices only).
  */
+import { CustomCursor } from "@/components/CustomCursor";
 import { Navbar } from "@/components/Navbar";
-import { ScrollProgress } from "@/components/ScrollProgress";
-import { SmoothScroll } from "@/components/SmoothScroll";
 import { Hero } from "@/components/sections/Hero";
-import { TechMarquee } from "@/components/sections/TechMarquee";
+import { Work } from "@/components/sections/Work";
 import { About } from "@/components/sections/About";
-import { Projects } from "@/components/sections/Projects";
 import { Skills } from "@/components/sections/Skills";
-import { Education } from "@/components/sections/Education";
-import { Experience } from "@/components/sections/Experience";
 import { Contact } from "@/components/sections/Contact";
+import { Footer } from "@/components/sections/Footer";
 
 export default function Home() {
   return (
-    <>
-      <SmoothScroll />
-      <ScrollProgress />
+    <div className="relative overflow-x-hidden bg-bg">
+      <CustomCursor />
       <Navbar />
       <main>
         <Hero />
-        <TechMarquee />
+        <Work />
         <About />
-        <Projects />
         <Skills />
-        <Education />
-        <Experience />
         <Contact />
       </main>
-    </>
+      <Footer />
+    </div>
   );
 }

@@ -3,185 +3,191 @@
 @tailwind utilities;
 
 /*
-  Design tokens — grounded in the Linear design system (design-systems skill):
-  the deepest near-black canvas with a faint blue tint, a four-step surface
-  ladder, and hairline borders carrying depth instead of drop shadows. One
-  chromatic accent (violet-lavender, the project's committed identity). Dark
-  only by design. The Tailwind config maps utility names onto these variables.
+  Ported from the imported Claude Design ("Portfolio - Chiranth"). Holds the
+  base reset, the custom-cursor visibility rules, the keyframes, and the
+  hover/interaction component classes that are cleaner as CSS than as utilities.
+  Color tokens live in tailwind.config.ts.
 */
-:root {
-  --background: #010102; /* near-pure black, faint blue tint (Linear canvas) */
-  --surface: #0f1011; /* surface-1 — cards, panels */
-  --surface-raised: #141516; /* surface-2 — hover / featured */
-  --surface-3: #18191a; /* surface-3 — nested / dropdowns */
-  --border: #23252a; /* hairline */
-  --border-strong: #34343a; /* hairline-strong — hover / focus edges */
-  --text-primary: #f7f8f8; /* headlines + emphasized body */
-  --text-secondary: #b0b4bd; /* body copy (AA on canvas) */
-  --text-muted: #8a8f98; /* labels, meta, captions */
-  --text-faint: #62666d; /* disabled, footnotes */
-  --accent: #6c63ff; /* the ONE accent — violet-lavender */
-  --accent-hover: #837bff;
-  --accent-glow: rgba(108, 99, 255, 0.16);
-}
 
 @layer base {
   * {
-    border-color: var(--border);
+    box-sizing: border-box;
   }
-
   html {
     scroll-behavior: smooth;
-    /* Offset anchored scrolling so the sticky navbar never covers section tops
-       (used as the fallback when Lenis is off, e.g. reduced motion). */
     scroll-padding-top: 6rem;
   }
-
-  /* Lenis smooth-scroll requirements. */
-  html.lenis,
-  html.lenis body {
-    height: auto;
-  }
-  .lenis.lenis-smooth {
-    scroll-behavior: auto !important;
-  }
-  .lenis.lenis-smooth [data-lenis-prevent] {
-    overscroll-behavior: contain;
-  }
-  .lenis.lenis-stopped {
-    overflow: hidden;
-  }
-
   body {
-    background-color: var(--background);
-    color: var(--text-secondary);
-    /* Inter geometric alternates — the documented Linear substitute voice. */
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    margin: 0;
+    background: #0b0b0d;
+    color: #f4f3ef;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
   }
-
   ::selection {
-    background-color: rgba(108, 99, 255, 0.9);
-    color: #ffffff;
+    background: #e9e7e1;
+    color: #0b0b0d;
+  }
+  a {
+    color: inherit;
+  }
+  input,
+  textarea {
+    font-family: var(--font-mono), "JetBrains Mono", monospace;
   }
 
-  /* Thin, dark, custom scrollbar — quiet polish signal. */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #2a2c31 transparent;
+  /* Custom cursor takes over on real pointer devices only. */
+  @media (hover: hover) and (pointer: fine) {
+    body {
+      cursor: none;
+    }
+    a,
+    button,
+    input,
+    textarea,
+    [data-cursor] {
+      cursor: none;
+    }
   }
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #26282d;
-    border: 3px solid var(--background);
-    border-radius: 999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #34373d;
+  /* Hide the custom cursor entirely on touch. */
+  @media (hover: none) {
+    [data-cursor-dot],
+    [data-cursor-ring] {
+      display: none !important;
+    }
   }
 
-  /* Branded focus ring for keyboard users (Linear-style lavender outline). */
   :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 4px;
+    outline: 2px solid #e9e7e1;
+    outline-offset: 3px;
   }
 }
 
 @layer components {
-  /* Animated nav underline — grows from the left on hover, stays lit on the
-     active section. */
-  .nav-underline {
-    position: relative;
+  /* Contact rows — slide + arrow nudge on hover. */
+  .contact-link {
+    transition: background 0.28s ease, padding-left 0.3s ease;
   }
-  .nav-underline::after {
+  .contact-link:hover {
+    background: #181818 !important;
+    padding-left: 32px !important;
+  }
+  .contact-arrow {
+    display: inline-block;
+    transition: transform 0.28s ease;
+  }
+  .contact-link:hover .contact-arrow {
+    transform: translate(4px, -4px);
+  }
+
+  /* Nav links — underline wipe in from the left. */
+  .nav-link {
+    position: relative;
+    transition: color 0.22s ease;
+  }
+  .nav-link::after {
     content: "";
     position: absolute;
+    bottom: -3px;
     left: 0;
-    bottom: -6px;
-    height: 1.5px;
     width: 100%;
+    height: 1px;
+    background: #f4f3ef;
     transform: scaleX(0);
     transform-origin: left;
-    background: var(--accent);
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
-  .nav-underline:hover::after,
-  .nav-underline[data-active="true"]::after {
+  .nav-link:hover {
+    color: #f4f3ef !important;
+  }
+  .nav-link:hover::after {
     transform: scaleX(1);
   }
 
-  /* Lifted panel — surface fill + hairline + a faint top edge highlight, the
-     way Linear gives a dark card a "pixel-rendered" edge without drop shadow. */
-  .panel {
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+  /* Résumé button + its hover preview thumbnail. */
+  .nav-resume {
+    transition: background 0.22s ease, transform 0.22s ease;
   }
-  .panel-interactive {
-    transition:
-      background-color 0.25s ease,
-      border-color 0.25s ease,
-      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  .nav-resume:hover {
+    background: #d8d6d0 !important;
+    transform: scale(1.05) translateY(-1px);
   }
-  .panel-interactive:hover {
-    background-color: var(--surface-raised);
-    border-color: var(--border-strong);
+  .resume-wrapper {
+    position: relative;
+  }
+  .resume-thumb {
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    width: 154px;
+    height: 210px;
+    background: #f4f3ef;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 16px 14px;
+    opacity: 0;
+    transform: scale(0.88) translateY(-10px);
+    transform-origin: top right;
+    transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+    z-index: 200;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  }
+  .resume-wrapper:hover .resume-thumb {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  /* Skill card lift. */
+  .skill-card {
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.45s,
+      background 0.45s;
+  }
+  .skill-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(233, 231, 225, 0.45);
+    background: #101014;
   }
 }
 
 @layer utilities {
-  /* Film-grain texture — fixed page layer + hero. Endorsed by premium-ui-system
-     for organic depth on flat dark backgrounds. */
-  .page-grain {
-    opacity: 0.025;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* Faint engineered grid behind the hero — masked to fade out. */
-  .hero-grid {
-    background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 65% 55% at 35% 40%, #000 25%, transparent 72%);
-    -webkit-mask-image: radial-gradient(
-      ellipse 65% 55% at 35% 40%,
-      #000 25%,
-      transparent 72%
-    );
-  }
-
-  /* Seamless marquee loop — the track is duplicated, so -50% is one full set. */
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
+  @keyframes pulseDot {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
     }
-    to {
-      transform: translateX(-50%);
+    50% {
+      opacity: 0.3;
+      transform: scale(0.65);
     }
   }
+  @keyframes scrollHint {
+    0% {
+      transform: translateY(0);
+      opacity: 0.9;
+    }
+    60% {
+      opacity: 0.15;
+    }
+    100% {
+      transform: translateY(9px);
+      opacity: 0;
+    }
+  }
+  .anim-pulse-dot {
+    animation: pulseDot 1.8s ease-in-out infinite;
+  }
+  .anim-scroll-hint {
+    animation: scrollHint 1.6s ease-in-out infinite;
+  }
 
-  /* A single, restrained accent glow — toned well down from a spotlight. */
-  .hero-glow {
-    background: radial-gradient(
-      48% 42% at 32% 38%,
-      rgba(108, 99, 255, 0.1) 0%,
-      rgba(108, 99, 255, 0.03) 38%,
-      transparent 70%
-    );
+  /* Outlined / "hollow" display text used on the second line of big headings. */
+  .text-hollow {
+    color: #0b0b0d;
+    -webkit-text-stroke: 1.6px #3a3a40;
   }
 }
 
-/* Respect users who ask for less motion. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -190,6 +196,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

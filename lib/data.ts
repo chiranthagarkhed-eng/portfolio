@@ -1,298 +1,200 @@
 /**
- * Single source of truth for ALL personal content on the site.
+ * Single source of truth for all portfolio content. Layout/aesthetic come from
+ * the imported Claude Design ("Portfolio - Chiranth"); the case studies are
+ * Chiranth's real projects (DraftLab + the Market Pattern Scanner) and each viz
+ * panel reflects that project's actual mechanics, not invented metrics.
  *
- * Everything the owner needs to edit lives here — components read from these
- * exports and never hardcode copy. Anything still using a stand-in value is
- * marked with a `[REPLACE]` comment so it's grep-able before going live.
+ * Anything still needing a real value is tagged `[REPLACE]`.
  */
 
-import type { IconType } from "react-icons";
-import {
-  SiPython,
-  SiJavascript,
-  SiTypescript,
-  SiReact,
-  SiNextdotjs,
-  SiR,
-  SiPandas,
-  SiNumpy,
-  SiScikitlearn,
-  SiGit,
-  SiGithub,
-  SiJupyter,
-} from "react-icons/si";
-import { VscVscode } from "react-icons/vsc";
-
 /* ------------------------------------------------------------------ */
-/* Identity                                                            */
+/* Identity + navigation                                              */
 /* ------------------------------------------------------------------ */
 
 export const profile = {
   name: "Chiranth Agarkhed",
-  initials: "CA",
-  role: "Data Science & Economics Student",
-  university: "Rutgers University — New Brunswick, NJ",
-  degree: "B.S. Data Science & Economics",
-  graduation: "May 2028",
-  // Used in SEO + hero sub-headline.
-  seeking: "data science, analytics, and software internships",
   resumeUrl: "/resume.pdf", // [REPLACE] drop the real PDF in /public
   email: "chiranthagarkhed@gmail.com",
   links: {
-    linkedin: "https://www.linkedin.com/in/chiranth-agarkhed-20107a284/",
-    github: "https://github.com/chiranthagarkhed-eng",
+    github: { label: "@chiranthagarkhed-eng", href: "https://github.com/chiranthagarkhed-eng" },
+    linkedin: {
+      label: "in/chiranth-agarkhed",
+      href: "https://www.linkedin.com/in/chiranth-agarkhed-20107a284/",
+    },
   },
 } as const;
 
+export const navLinks = [
+  { label: "Work", href: "#work" },
+  { label: "About", href: "#about" },
+  { label: "Skills", href: "#skills" },
+  { label: "Contact", href: "#contact" },
+] as const;
+
 /* ------------------------------------------------------------------ */
-/* Hero                                                                */
+/* Hero                                                               */
 /* ------------------------------------------------------------------ */
 
 export const hero = {
-  availability: "Open to internships · Summer 2026",
-  // Split so exactly one phrase can carry the site's single gradient moment.
-  headline: {
-    lead: "I turn messy data into ",
-    accent: "decisions",
-    tail: " people actually use.",
+  badge: "Open to 2027 internships & freelance",
+  nameLines: ["CHIRANTH", "AGARKHED"] as const,
+  lede: {
+    lead: "Data Science & Economics student at ",
+    emphasis: "Rutgers University",
+    tail: ". I turn messy, high-dimensional data into models and decisions that hold up in production.",
   },
-  subheadline:
-    "Data Science & Economics @ Rutgers — I look for internships where the analysis changes what gets done, not just what gets reported.",
 } as const;
 
 /* ------------------------------------------------------------------ */
-/* About                                                               */
+/* Selected work                                                      */
 /* ------------------------------------------------------------------ */
 
-export const about = {
-  paragraphs: [
-    "I study data science and economics together because the two questions I care about most are inseparable: what does the data actually say, and what should anyone do about it? A model that predicts well but ignores incentives is half an answer. I spend my time on the other half.",
-    "I build things, not just notebooks. I recently shipped DraftLab, a personalized League of Legends draft assistant: it reads your last 30 ranked matches through the Riot API, weights recommendations toward champions you actually play, and attaches honest confidence to every number instead of pretending small samples are certain. I'm comfortable across the whole path — pulling and cleaning data, modeling it, and shipping the result as something a person can click.",
-    "I'm looking for an internship in data science, analytics, or software where the work is measured by the decisions it improves. I'm most useful where quantitative rigor meets a real domain — finance and markets especially — and I'd rather go deep on a hard problem than wide on an easy one.",
-  ],
-  photoAlt: "Portrait of Chiranth Agarkhed", // [REPLACE] add photo at /public/profile.jpg
-  // Presented as a spec sheet (label → value), not metric tiles.
-  stats: [
-    { label: "Shipped to production", value: "1 live app" },
-    { label: "Languages I work in", value: "5" },
-    { label: "Graduating", value: "Rutgers ’28" },
-    { label: "Focus", value: "Data Science × Economics" },
-  ],
-} as const;
+// DraftLab — formula + role-interaction matrix (both real implementation details).
+export type DraftViz = {
+  kind: "draft";
+  header: string;
+  formulaCaption: string;
+  formula: string;
+  matrixLabel: string;
+  roles: string[];
+  matrix: number[][]; // weights 0.2–1.0; diagonal = same lane
+  footer: { left: string; right: string };
+};
 
-/* ------------------------------------------------------------------ */
-/* Projects                                                            */
-/* ------------------------------------------------------------------ */
+// Scanner — price line with a flagged pattern + the real detection rule.
+export type ScannerViz = {
+  kind: "scanner";
+  header: string;
+  caption: string;
+  points: string; // SVG polyline in a 0 0 400 80 viewBox
+  marker: { x: number; y: number }; // flagged pattern point
+  rule: string;
+  matchesLabel: string;
+  matches: { ticker: string; pattern: string }[];
+  footer: { left: string; right: string };
+};
+
+export type ProjectViz = DraftViz | ScannerViz;
 
 export type Project = {
-  name: string;
-  status: "shipped" | "in-development";
-  problem: string;
-  build: string;
-  // Economic / domain angle — surfaced before the tech to reflect the DS×Econ thesis.
-  insight: string;
+  num: string;
+  meta: string;
+  titleLines: [string, string];
+  description: string;
   stack: string[];
-  outcome?: string;
-  liveUrl?: string;
-  githubUrl?: string;
-  // A short, representative code snippet shown in the card's visual column.
-  snippet: { language: string; code: string };
+  metric: string;
+  href: string;
+  linkLabel: string;
+  viz: ProjectViz;
 };
 
 export const projects: Project[] = [
   {
-    name: "DraftLab",
-    status: "shipped",
-    problem:
-      "Most League of Legends draft tools spit out global \"best picks\" that ignore which champions you actually play — and quote win-rates from tiny samples as if they were certain.",
-    build:
-      "A personalized draft assistant that reads your last 30 ranked matches through the Riot API, builds a per-role champion pool, and recommends picks weighted toward what you really play. It analyzes cross-role matchups (e.g. ADC vs enemy jungler) with a role-interaction matrix to surface advantages that global \"best-pick\" tools ignore.",
-    // Google XYZ formula — accomplished [X], as measured by [Y], by doing [Z].
-    insight:
-      "Shipped a personalized draft assistant live on Vercel (X), measured by recommendations that carry an explicit sample-size confidence badge instead of false precision (Y), by applying sample-size-aware shrinkage — pulling thin-sample win-rates back toward 50% so low-volume champions can't masquerade as high-confidence picks (Z).",
-    stack: [
-      "Next.js",
-      "TypeScript",
-      "Tailwind CSS",
-      "Python",
-      "Riot API",
-      "SQLite",
-    ],
-    outcome: "Live on Vercel • 30-match personalization • confidence-badged stats",
-    githubUrl: "https://github.com/chiranthagarkhed-eng/draftLab",
-    liveUrl: "https://draftlab-lol.vercel.app",
-    snippet: {
-      language: "typescript",
-      code: `// Shrink a win-rate toward 50% when the sample is thin,
-// so low-volume champions can't fake high confidence.
-function adjustedEdge(rawWinrate: number, games: number) {
-  const confidence = Math.min(1, Math.sqrt(games / 1000));
-  return (rawWinrate - 0.5) * confidence;
-}`,
+    num: "01",
+    meta: "LoL Draft Assistant · TypeScript · 2025",
+    titleLines: ["DraftLab", "Draft Assistant"],
+    description:
+      "Personalized League of Legends draft assistant. It reads your last 30 ranked games through the Riot API, builds a per-role champion pool, and ranks picks with sample-size-aware shrinkage so thin data never masquerades as confidence.",
+    stack: ["Next.js", "TypeScript", "Python", "Riot API", "SQLite"],
+    metric: "Live on Vercel · 30-game personalization",
+    href: "https://draftlab-lol.vercel.app",
+    linkLabel: "View live →",
+    viz: {
+      kind: "draft",
+      header: "DRAFTLAB / DRAFT ENGINE",
+      formulaCaption: "Sample-size-aware shrinkage",
+      formula: "edge = (winrate − 0.5) × min(1, √(games ÷ 1000))",
+      matrixLabel: "Role-interaction matrix",
+      roles: ["TOP", "JNG", "MID", "ADC", "SUP"],
+      matrix: [
+        [1.0, 0.5, 0.4, 0.2, 0.2],
+        [0.5, 1.0, 0.6, 0.4, 0.4],
+        [0.4, 0.6, 1.0, 0.4, 0.4],
+        [0.2, 0.4, 0.4, 1.0, 0.8],
+        [0.2, 0.4, 0.4, 0.8, 1.0],
+      ],
+      footer: { left: "Pool: last 30 ranked", right: "Weights 1.0 → 0.2" },
     },
   },
   {
-    name: "Stock Market Scanner",
-    status: "in-development",
-    problem:
-      "Retail traders miss high-probability technical setups because the signals are buried across hundreds of tickers and only obvious in hindsight.",
-    build:
-      "A Python application that pulls live and historical price data, detects Bullish Breakout and Doji Reversal patterns with rule-based logic, and ranks the matches on a live dashboard so a user sees the handful of names worth a closer look — not a wall of charts.",
-    insight:
-      "Patterns are only worth acting on when they beat a naive baseline. The scanner is built to be back-tested, so a signal earns its place by how it would have performed — not by how good the chart looks.",
+    num: "02",
+    meta: "Market Scanner · Python · 2024",
+    titleLines: ["Market Pattern", "Scanner"],
+    description:
+      "Python scanner that pulls live and historical price data and flags technical setups — Bullish Breakouts and Doji Reversals — ranking matches on a live dashboard. Every signal is built to be back-tested, so it has to beat a naive baseline before it counts.",
     stack: ["Python", "Pandas", "NumPy", "Plotly / Dash", "yfinance"],
-    outcome: "Scans 500+ tickers per refresh • back-testing harness in progress",
-    githubUrl: undefined, // [REPLACE] add repo URL when public
-    liveUrl: undefined, // [REPLACE] add when deployed
-    snippet: {
-      language: "python",
-      code: `def detect_doji_reversal(df, body_ratio=0.1):
-    """Flag candles whose body is tiny vs. their range
-    after a downtrend — a classic reversal tell."""
-    rng = df["high"] - df["low"]
-    body = (df["close"] - df["open"]).abs()
-    is_doji = body <= body_ratio * rng
-    downtrend = df["close"] < df["close"].rolling(5).mean()
-    return df[is_doji & downtrend]`,
+    metric: "500+ tickers / refresh · back-test harness",
+    href: "#", // [REPLACE] repo / live link when public
+    linkLabel: "View →",
+    viz: {
+      kind: "scanner",
+      header: "SCANNER / DOJI REVERSAL",
+      caption: "Sample setup · 1D candles · flagged",
+      points:
+        "0,40 30,34 60,42 90,30 120,46 150,55 180,62 210,66 240,68 252,67 272,55 300,44 330,33 360,25 400,16",
+      marker: { x: 252, y: 67 },
+      rule: "flag if  body ≤ 0.1 × range   and   close < SMA(5)",
+      matchesLabel: "Latest matches",
+      matches: [
+        { ticker: "NVDA", pattern: "Bullish Breakout" },
+        { ticker: "AAPL", pattern: "Doji Reversal" },
+        { ticker: "TSLA", pattern: "Bullish Breakout" },
+      ],
+      footer: { left: "Tickers scanned: 500+", right: "Baseline: SMA(5)" },
     },
   },
 ];
 
 /* ------------------------------------------------------------------ */
-/* Skills                                                              */
+/* About                                                              */
 /* ------------------------------------------------------------------ */
 
-export type Skill = { name: string; icon?: IconType };
-
-export type SkillGroup = { title: string; skills: Skill[] };
-
-/*
- * Two axes on purpose. Splitting "Data & ML" from "Economics & Quantitative
- * Methods" is the design choice that signals the intersection — a generic dev
- * portfolio would collapse these into one flat grid.
- */
-export const skillGroups: SkillGroup[] = [
-  {
-    title: "Languages & Libraries",
-    skills: [
-      { name: "Python", icon: SiPython },
-      { name: "JavaScript", icon: SiJavascript },
-      { name: "TypeScript", icon: SiTypescript },
-      { name: "React", icon: SiReact },
-      { name: "Next.js", icon: SiNextdotjs },
-      { name: "SQL" }, // no honest brand icon for generic SQL — monogram tile
-      { name: "R", icon: SiR },
-      { name: "Pandas", icon: SiPandas },
-      { name: "NumPy", icon: SiNumpy },
-      { name: "scikit-learn", icon: SiScikitlearn },
-      { name: "Matplotlib" }, // simple-icons has no Matplotlib mark — monogram tile
-    ],
+export const about = {
+  heading: {
+    lead: "I turn messy data into ",
+    emphasis: "decisions",
+    tail: " — bridging rigorous economics with modern machine learning.",
   },
-  {
-    title: "Data & ML",
-    skills: [
-      { name: "Machine Learning" },
-      { name: "Data Analysis" },
-      { name: "Statistical Modeling" },
-      { name: "Data Pipelines" },
-      { name: "REST APIs" },
-    ],
+  paragraph: {
+    lead: "I'm a Data Science & Economics student at Rutgers University, focused on where statistical theory meets production systems. I like problems that need both — a clean causal story ",
+    emphasis: "and",
+    tail: " a model that ships. Recently I built DraftLab, a live draft-assistant web app, and a market-pattern scanner where every signal has to beat a naive baseline before it counts. I'm currently looking for 2027 internships and select freelance engagements.",
   },
-  {
-    title: "Economics & Quantitative Methods",
-    skills: [
-      { name: "Econometrics" },
-      { name: "Regression Analysis" },
-      { name: "Time-Series Analysis" },
-      { name: "Market & Financial Data" },
-    ],
-  },
-  {
-    title: "Tools & Workflow",
-    skills: [
-      { name: "Git", icon: SiGit },
-      { name: "GitHub", icon: SiGithub },
-      { name: "Jupyter", icon: SiJupyter },
-      { name: "VS Code", icon: VscVscode },
-    ],
-  },
-];
-
-/* ------------------------------------------------------------------ */
-/* Education                                                           */
-/* ------------------------------------------------------------------ */
-
-export const education = {
-  school: "Rutgers University — New Brunswick, NJ",
-  degree: "B.S. Data Science & Economics",
-  graduation: "Expected May 2028",
-  coursework: [
-    "Data Structures", // [REPLACE] with actual courses as you take them
-    "Econometrics",
-    "Introduction to Machine Learning",
-    "Statistical Analysis",
-    "Linear Algebra",
-    "Database Systems",
-  ],
-  activities: [
-    "Rutgers Data Science Club", // [REPLACE]
-    "Quantitative Finance / Investing Group", // [REPLACE]
+  facts: [
+    { label: "Location", value: "New Brunswick, NJ", accent: false },
+    { label: "Focus", value: "ML · Econometrics", accent: false },
+    { label: "Status", value: "Open to '27", accent: true },
+    { label: "Core tools", value: "Python · SQL · Next.js", accent: false },
   ],
 } as const;
 
 /* ------------------------------------------------------------------ */
-/* Experience & Involvement                                            */
+/* Skills                                                             */
 /* ------------------------------------------------------------------ */
 
-export type ExperienceItem = {
-  role: string;
-  org: string;
-  dates: string;
-  bullets: string[];
-};
-
-export const experience: ExperienceItem[] = [
+export const skillGroups = [
+  { num: "01 / Languages", title: "Languages", items: ["Python", "R", "SQL", "TypeScript", "JavaScript"] },
   {
-    role: "Creator — DraftLab (LoL Draft Assistant)",
-    org: "Independent project · live on Vercel",
-    dates: "2025 — Present",
-    bullets: [
-      // Each bullet follows the Google XYZ formula: accomplished [X], measured by [Y], by doing [Z].
-      "Designed, built, and shipped DraftLab to production on Vercel, measured by a working end-to-end flow from Riot match history to ranked, personalized champion picks, by building a Python data pipeline and a client-side Next.js/TypeScript recommendation engine.",
-      "Eliminated false confidence from thin-sample champions by applying sample-size-aware shrinkage — (winrate − 0.5) × min(1, √(games/1000)) — so every recommendation degrades gracefully instead of overclaiming on low-volume data.",
-      "Improved draft relevance over global \"best pick\" tools by weighting cross-role matchups with a role-interaction matrix (1.0 → 0.2) that captures interactions other tools ignore (e.g. ADC vs enemy jungler).",
-    ],
+    num: "02 / ML & Data",
+    title: "ML & Data",
+    items: ["scikit-learn", "Pandas", "NumPy", "Matplotlib", "Jupyter"],
   },
   {
-    role: "Independent Project Work — Data Science",
-    org: "Self-directed",
-    dates: "2024 — Present",
-    bullets: [
-      "Building a Python market scanner end to end — data ingestion, pattern-detection logic, and a live dashboard — to turn raw price feeds into a ranked shortlist of tradable setups.",
-      "Designing every signal to be back-tested so it has to beat a naive baseline before it earns a place in the tool.",
-    ],
+    num: "03 / Tools & Web",
+    title: "Tools & Web",
+    items: ["Next.js", "React", "SQLite", "Riot API", "Git"],
   },
-  {
-    role: "Add your role here", // [REPLACE] club leadership, tutoring, part-time work, etc.
-    org: "Organization",
-    dates: "Dates",
-    bullets: [
-      "Replace with an impact statement: what changed because you were there, with a number if you have one.",
-      "Lead with the result, not the task — e.g. 'Grew turnout 40% over a semester by …' rather than 'Managed events.'",
-    ],
-  },
-];
-
-/* ------------------------------------------------------------------ */
-/* Navigation                                                          */
-/* ------------------------------------------------------------------ */
-
-export const navLinks = [
-  { label: "Home", href: "#hero" },
-  { label: "About", href: "#about" },
-  { label: "Projects", href: "#projects" },
-  { label: "Skills", href: "#skills" },
-  { label: "Education", href: "#education" },
-  { label: "Experience", href: "#experience" },
-  { label: "Contact", href: "#contact" },
 ] as const;
+
+/* ------------------------------------------------------------------ */
+/* Contact                                                            */
+/* ------------------------------------------------------------------ */
+
+export const contact = {
+  headingLines: ["LET'S BUILD", "SOMETHING"] as const,
+  channels: [
+    { label: "Email", value: profile.email, href: `mailto:${profile.email}` },
+    { label: "GitHub", value: profile.links.github.label, href: profile.links.github.href },
+    { label: "LinkedIn", value: profile.links.linkedin.label, href: profile.links.linkedin.href },
+  ],
+} as const;

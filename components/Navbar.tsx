@@ -1,35 +1,71 @@
 "use client";
 
 /**
- * Navbar — fixed to top, transparent over the hero and fading to a blurred
- * dark bar with a hairline border once the user scrolls past ~80px. Desktop
- * links use an animated underline that stays lit on the active section
- * (scroll-spy via useActiveSection). The logo is a monospace monogram (no
- * image). Below md it collapses to a hamburger + slide-down panel.
+ * Navbar — fixed, transparent over the hero and fading to a blurred dark bar
+ * once scrolled past 40px. Desktop shows the mono link row (underline-wipe on
+ * hover) and the bone Résumé button with a hover preview thumbnail of the
+ * actual resume. Below md it collapses to a hamburger + slide-down panel for
+ * responsiveness/accessibility (the design is desktop-first).
  */
 import { useEffect, useState } from "react";
-import { Menu, X, FileText, ArrowUpRight } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Menu, X } from "lucide-react";
 import { navLinks, profile } from "@/lib/data";
-import { useActiveSection } from "@/lib/useActiveSection";
-import { cn } from "@/lib/utils";
 
-const sectionIds = navLinks.map((l) => l.href.replace("#", ""));
+function ResumeThumb() {
+  // Miniature of the resume — purely decorative skeleton, hidden from a11y tree.
+  const bar = (w: string, o = 0.08) => (
+    <div style={{ height: 4, width: w, background: `rgba(0,0,0,${o})`, borderRadius: 1 }} />
+  );
+  return (
+    <div className="resume-thumb" aria-hidden>
+      <div className="font-display text-[11px] font-black tracking-[-0.01em] text-[#0b0b0d]">
+        CHIRANTH AGARKHED
+      </div>
+      <div className="mb-2.5 mt-0.5 font-mono text-[8px] tracking-[0.06em] text-[#7a7a80]">
+        Data Science &amp; Economics
+      </div>
+      <div className="mb-2 border-t border-black/10" />
+      {["Experience", "Education", "Skills"].map((label, i) => (
+        <div key={label}>
+          <div className="mb-[5px] font-mono text-[7.5px] font-semibold uppercase tracking-[0.1em] text-[#0b0b0d]">
+            {label}
+          </div>
+          <div className="mb-[9px] flex flex-col gap-[3px]">
+            {i === 2 ? (
+              <div className="flex flex-wrap gap-[3px]">
+                {bar("30%", 0.12)}
+                {bar("22%", 0.1)}
+                {bar("35%", 0.1)}
+                {bar("25%")}
+              </div>
+            ) : (
+              <>
+                {bar("90%", 0.12)}
+                {bar("70%")}
+                {i === 0 && bar("80%")}
+              </>
+            )}
+          </div>
+        </div>
+      ))}
+      <div className="absolute bottom-3 right-3.5 font-mono text-[8px] tracking-[0.06em] text-[#b4b4b8]">
+        PDF ↓
+      </div>
+    </div>
+  );
+}
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const reduceMotion = useReducedMotion();
-  const active = useActiveSection(sectionIds);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll while the mobile menu is open.
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -39,129 +75,82 @@ export function Navbar() {
 
   return (
     <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        scrolled || open
-          ? "border-b border-border bg-background/80 backdrop-blur-xl"
-          : "border-b border-transparent bg-transparent",
-      )}
+      data-nav
+      className="fixed inset-x-0 top-0 z-[60] flex items-center justify-between px-6 py-5 transition-[background,border-color,backdrop-filter] duration-300 sm:px-10"
+      style={{
+        background: scrolled ? "rgba(11,11,13,.82)" : "transparent",
+        backdropFilter: scrolled ? "blur(10px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(10px)" : "none",
+        borderBottom: `1px solid ${scrolled ? "rgba(255,255,255,.08)" : "transparent"}`,
+      }}
     >
-      <nav className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-6 sm:px-8">
-        <a
-          href="#hero"
-          className="group flex items-center gap-2.5 font-mono text-sm font-medium tracking-tight text-text-primary"
-          aria-label={`${profile.name} — home`}
-        >
-          <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-surface text-accent transition-colors group-hover:border-accent/60">
-            {profile.initials}
-          </span>
-          <span className="hidden text-text-secondary transition-colors group-hover:text-text-primary sm:inline">
-            {profile.name.split(" ")[0]}
-            <span className="text-text-muted">.dev</span>
-          </span>
-        </a>
+      <a
+        href="#top"
+        data-cursor="link"
+        className="flex items-center gap-[11px] font-mono text-xs font-medium uppercase tracking-[0.14em] text-ink no-underline"
+      >
+        <span className="inline-block h-[9px] w-[9px] bg-bone" />
+        {profile.name}
+      </a>
 
-        {/* Desktop links with scroll-spy underline */}
-        <ul className="hidden items-center gap-9 md:flex">
-          {navLinks.map((link) => {
-            const id = link.href.replace("#", "");
-            const isActive = active === id;
-            return (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  data-active={isActive}
-                  className={cn(
-                    "nav-underline text-[13px] font-medium tracking-wide transition-colors",
-                    isActive
-                      ? "text-text-primary"
-                      : "text-text-secondary hover:text-text-primary",
-                  )}
-                >
-                  {link.label}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div className="flex items-center gap-2">
+      {/* Desktop nav */}
+      <div className="hidden items-center gap-7 font-mono text-xs uppercase tracking-[0.1em] md:flex">
+        {navLinks.map((link) => (
+          <a key={link.href} href={link.href} data-cursor="link" className="nav-link text-[#b6b6bd] no-underline">
+            {link.label}
+          </a>
+        ))}
+        <div className="resume-wrapper">
           <a
             href={profile.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="group hidden items-center gap-2 rounded-md border border-accent/50 bg-accent/5 px-4 py-2 text-sm font-medium text-text-primary transition-all hover:border-accent hover:bg-accent/15 md:inline-flex"
+            data-cursor="link"
+            className="nav-resume flex items-center gap-2 bg-bone px-[15px] py-[9px] font-semibold text-[#0b0b0d] no-underline"
           >
-            <FileText size={15} className="text-accent" />
-            Resume
-            <ArrowUpRight
-              size={14}
-              className="text-text-muted transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-accent"
-            />
+            Résumé <span className="text-[13px]">↓</span>
           </a>
-
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-text-primary transition-colors hover:bg-surface md:hidden"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          <ResumeThumb />
         </div>
-      </nav>
+      </div>
 
-      {/* Mobile slide-down menu */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="overflow-hidden border-t border-border bg-background/95 backdrop-blur-xl md:hidden"
-          >
-            <ul className="flex flex-col gap-1 px-6 py-4">
-              {navLinks.map((link, i) => {
-                const id = link.href.replace("#", "");
-                const isActive = active === id;
-                return (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-md px-2 py-3 text-base transition-colors",
-                        isActive
-                          ? "text-text-primary"
-                          : "text-text-secondary hover:bg-surface hover:text-text-primary",
-                      )}
-                    >
-                      <span className="font-mono text-xs text-text-muted">
-                        0{i + 1}
-                      </span>
-                      {link.label}
-                    </a>
-                  </li>
-                );
-              })}
-              <li>
-                <a
-                  href={profile.resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpen(false)}
-                  className="mt-2 flex items-center gap-2 rounded-md border border-accent/60 px-2 py-3 text-base font-medium text-text-primary"
-                >
-                  <FileText size={16} className="text-accent" />
-                  Resume
-                </a>
-              </li>
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Mobile toggle */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label={open ? "Close menu" : "Open menu"}
+        aria-expanded={open}
+        className="text-ink md:hidden"
+      >
+        {open ? <X size={22} /> : <Menu size={22} />}
+      </button>
+
+      {/* Mobile menu */}
+      {open && (
+        <div className="absolute inset-x-0 top-full border-b border-white/10 bg-[#0b0b0d]/95 backdrop-blur-md md:hidden">
+          <nav className="flex flex-col gap-1 px-6 py-4 font-mono text-sm uppercase tracking-[0.1em]">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="py-3 text-[#b6b6bd] no-underline"
+              >
+                {link.label}
+              </a>
+            ))}
+            <a
+              href={profile.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="mt-2 inline-flex w-fit items-center gap-2 bg-bone px-4 py-2.5 font-semibold normal-case tracking-normal text-[#0b0b0d] no-underline"
+            >
+              Résumé ↓
+            </a>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
